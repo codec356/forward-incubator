@@ -1,0 +1,5 @@
+select count (distinct substr(v_message, length('Загрузка порции заказов начиная с ')))
+	from fw_process_log
+		where instr(v_message, 'Загрузка порции заказов начиная с ') > 0
+
+

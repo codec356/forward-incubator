@@ -1,0 +1,6 @@
+select count(v_message)
+
+	from fw_process_log
+		where instr(v_message, '2520123')>0
+
+		and id_error_code < 0

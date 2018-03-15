@@ -1,0 +1,5 @@
+select count(1)
+    from fw_process_log
+        where instr(v_message, 'Процесс продвижения заказов завершен.')>0
+        and dt_timestamp >= to_date('01-03-18 00:00:01','dd-mm-yy hh24:mi;ss')
+        and dt_timestamp <= to_date('31-03-18 23:59:59','dd-mm-yy hh24:mi:ss')

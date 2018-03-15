@@ -1,0 +1,6 @@
+select count(id_log), count(distinct v_message)
+    from fw_process_log
+        where id_process=5
+        and instr(v_message,'ошибкой')>0
+        and dt_timestamp>to_date('22-02-2018','dd-mm-yyyy')
+        and dt_timestamp<to_date('02-03-2018','dd-mm-yyyy')

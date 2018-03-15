@@ -1,0 +1,5 @@
+select max(dt_timestamp), id_user
+    from fw_process_log
+        where id_user=11136
+        and instr(v_message, 'вошел')>0
+    group by id_user

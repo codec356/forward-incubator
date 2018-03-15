@@ -1,0 +1,5 @@
+select min(n_sum)
+    from fw_transfers
+        where dt_incoming>to_date('10:00 14-02-2017','hh24:mi dd-mm-yyyy')
+        and dt_incoming<to_date('12:00 14-02-2017','hh24:mi dd-mm-yyyy')
+        and id_contract_from!=id_contract_to

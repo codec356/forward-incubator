@@ -1,0 +1,6 @@
+ select quantity
+        from 
+            (select distinct count(sid) as quantity
+                from fw_process_log
+                    group by sid)
+        where quantity>1

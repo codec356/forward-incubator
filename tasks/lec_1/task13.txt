@@ -1,0 +1,4 @@
+select to_char(dt_real,'dd.mm.yyyy'), count(id_transfer_inst)     
+    from fw_transfers
+        where id_contract_from=id_contract_to
+        group by to_char(dt_real,'dd.mm.yyyy')

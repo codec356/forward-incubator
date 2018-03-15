@@ -1,0 +1,3 @@
+select (to_char(dt_timestamp, 'month')), count(id_log)
+    from fw_process_log
+    group by to_char(dt_timestamp, 'month')

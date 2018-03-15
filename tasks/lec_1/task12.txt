@@ -1,0 +1,4 @@
+select id_contract_to, dt_real, (length(v_description)-22) as quantity
+    from fw_transfers
+        where length(v_description)>22
+    order by quantity desc
