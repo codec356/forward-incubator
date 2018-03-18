@@ -1,0 +1,3 @@
+select fc.v_ext_ident, fc.dt_reg_event, fd.v_name
+from fw_contracts fc left join fw_departments fd on fc.id_department=fd.id_department
+where fc.v_status='A'
