@@ -1,0 +1,6 @@
+select fd.v_name
+    from fw_departments fd 
+        left join 
+        fw_contracts fc 
+        on fd.id_department=fc.id_department
+    where fc.id_contract_inst is null
