@@ -1,0 +1,19 @@
+select id_contract_inst, v_ext_ident, v_status, v_name
+from 
+    ((select dns.id_contract_inst, v_ext_ident, v_status, act
+    from
+        (select id_currency as was, id_contract_inst
+        from fw_contracts 
+        where dt_stop!=to_date('01-01-2500','dd-mm-yyyy')) ds
+
+        inner join
+
+        (select id_currency as act, id_contract_inst, v_ext_ident, v_status
+        from fw_contracts
+        where dt_stop=to_date('01-01-2500','dd-mm-yyyy')) dns
+        
+        on ds.id_contract_inst=dns.id_contract_inst
+        
+    where was!=act)
+    
+    inner join fw_currency on act=id_currency)
