@@ -1,0 +1,11 @@
+select id_contract_inst, v_ext_ident, v_status, ctr
+            from             
+            (fw_contracts fc 
+            left join 
+                (select id_contract, count(id_trans) as ctr
+                from trans_external
+                where to_char(DT_EVENT,'yyyy')='2017'
+                group by id_contract) te
+            on fc.id_contract_inst=te.id_contract)
+where ctr>3
+and dt_stop=to_date('01-01-2500','dd-mm-yyyy')
