@@ -1,0 +1,7 @@
+select v_ext_ident 
+from fw_contracts 
+where dt_start<=to_date('01-01-2016','dd-mm-yyyy')
+and dt_stop>=to_date('01-01-2016','dd-mm-yyyy')
+and id_contract_inst=(select id_contract 
+                        from trans_external
+                        where id_trans=6397542)
