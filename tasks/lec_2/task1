@@ -1,0 +1,6 @@
+select distinct te.f_sum, te.dt_event
+    from trans_external te join fw_contracts fc on te.id_contract=fc.id_contract_inst
+        where te.dt_event=(select max(te.dt_event)
+                            from (fw_contracts fc join trans_external te on te.id_contract=fc.id_contract_inst)
+                            where fc.v_ext_ident='0102100000088207_MG1')
+        and fc.v_ext_ident='0102100000088207_MG1'
