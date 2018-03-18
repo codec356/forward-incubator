@@ -1,0 +1,32 @@
+select v_name, sumpays, countpays, countcontr
+from
+(
+    ((select count(dt_event) as countpays, sum(f_sum) as sumpays, id_department as dep
+    from
+    
+        ((select dt_event, f_sum, id_contract        
+        from trans_external
+        where dt_event>to_date(to_char(current_timestamp,'mm-yyyy'),'mm-yyyy')) te
+        
+        inner join
+        fw_contracts fc 
+        
+        on fc.id_contract_inst=te.id_contract)
+        
+    where dt_stop=to_date('01-01-2500','dd-mm-yyyy')
+    group by id_department) csd
+    
+    join 
+    
+    fw_departments fd 
+    
+    on dep=fd.id_department) 
+    
+    join 
+    
+    (select distinct count(id_contract_inst) as countcontr,id_department
+    from fw_contracts
+    where dt_stop=to_date('01-01-2500','dd-mm-yyyy')
+    group by id_department) countc
+
+    on countc.id_department=dep)
