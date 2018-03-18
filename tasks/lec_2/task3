@@ -1,0 +1,5 @@
+select v_name 
+from (select fd.v_name, count(fc.id_contract_inst) as quantity
+            from fw_contracts fc right join fw_departments fd on fc.id_department=fd.id_department
+      group by fd.v_name)
+where quantity<2
