@@ -1,0 +1,15 @@
+select distinct f_sum, cu.v_description, fc.v_ext_ident
+from 
+((((select max(f_sum) as maxpay, id_contract
+    from trans_external te
+    group by id_contract) mp
+    
+    join trans_external te1
+    on mp.id_contract=te1.id_contract and maxpay=te1.f_sum)
+    
+    left join ci_users cu
+    on id_manager_delete=cu.id_user)
+    
+    join fw_contracts fc
+    on mp.id_contract=fc.id_contract_inst)
+
