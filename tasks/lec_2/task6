@@ -1,0 +1,15 @@
+select v_ext_ident, v_status, v_name
+from 
+    (select fc.id_contract_inst, fc.v_ext_ident, te.v_status, fd.v_name, count(te.f_sum) as quantity
+        from 
+            ((fw_contracts fc 
+            left join 
+            trans_external te 
+            on fc.id_contract_inst=te.id_contract) 
+            left join 
+            fw_departments fd 
+            on fc.id_department=fd.id_department)
+        where to_char(DT_EVENT,'yyyy')='2017'
+        and dt_stop=to_date('01-01-2500','dd-mm-yyyy')
+    group by fc.id_contract_inst,fc.v_ext_ident, te.v_status, fd.v_name)
+where quantity>1
