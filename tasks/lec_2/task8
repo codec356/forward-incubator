@@ -1,8 +1,8 @@
-select distinct quantity, datem, v_ext_ident, id_manager
+select distinct quantity,datem,v_ext_ident,cu.v_description 
 
 from
 
-    (((select max(te.dt_event) as datem, count(te.id_trans) as quantity, te.id_contract as idc
+    ((((select max(te.dt_event) as datem, count(te.id_trans) as quantity, te.id_contract as idc
     from trans_external te
     group by te.id_contract) dq 
     
@@ -13,5 +13,6 @@ from
     inner join 
 
     fw_contracts fc on idc=fc.id_contract_inst)
+	left join ci_users cu on id_manager=cu.id_user)
     
 where dt_stop=to_date('01-01-2500','dd-mm-yyyy')
