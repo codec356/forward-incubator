@@ -1,0 +1,34 @@
+with sumcost as
+(
+select sum(n_cost_period) as sumc, fd.v_name as namedep, fc.id_contract_inst, fs.v_name as nameu
+from 
+fw_contracts fc join fw_services_cost fsc
+on fc.id_contract_inst=fsc.id_contract_inst
+join fw_departments fd
+on fd.id_department=fc.id_department
+join fw_services fss 
+on fss.id_service_inst=fsc.id_service_inst
+join fw_service fs
+on fs.id_service=fss.id_service
+
+where fsc.dt_start<= localtimestamp
+and   fsc.dt_stop> localtimestamp
+group by fd.v_name, fc.id_contract_inst, fs.v_name),
+
+aver as
+(select avg(sumc) as sumd, namedep
+from sumcost sc 
+group by namedep),
+
+sumdep as 
+(select sumc, namedep, nameu
+from sumcost 
+group by namedep, nameu)
+
+
+select distinct nameu, namedep, sumc
+from sumcost sc
+where sumc>(select sumd
+            from aver
+            where namedep=sc.namedep)
+order by sumc
