@@ -1,0 +1,20 @@
+select fd.v_name, top, bottom
+from 
+(
+select distinct deps, first_value(nameserv) over (partition by deps) as top , last_value(nameserv) over (partition by deps) as bottom 
+from
+    (
+    select deps, nameserv, dense_rank() over (partition by deps order by nameserv desc ) as top
+    from 
+        (
+        select count(nvl(fsc.v_name,'0')) as cnt, fc.id_department as deps, fsc.v_name as nameserv
+        from fw_contracts fc join fw_services fs
+        on fc.id_contract_inst=fs.id_contract_inst
+        left join fw_service fsc on fs.id_service=fsc.id_service
+        group by fc.id_department, fsc.v_name
+        order by cnt desc, deps
+        )
+    order by deps, top
+    )
+) 
+left join fw_departments fd on deps=fd.id_department 
