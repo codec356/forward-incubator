@@ -1,0 +1,13 @@
+with countch as
+(select count(n_discount_period)-1 as cchange, id_contract_inst
+from
+(select distinct n_discount_period, id_contract_inst
+from fw_services_cost 
+where dt_start<= to_date('11-2017','mm-yyyy')
+and   dt_stop> to_date('11-2017','mm-yyyy')
+order by id_contract_inst asc)
+group by id_contract_inst)
+
+
+select v_ext_ident, cchange
+from (countch cc join fw_contracts fc on cc.id_contract_inst=fc.id_contract_inst)
