@@ -1,0 +1,15 @@
+select fd.v_name, sums.v_name, summ
+from
+(select *
+from
+(select nvl(sum(n_cost_period),0) summ, ft.v_name, fc.id_department
+from fw_tariff_plan ft join fw_services fss on ft.id_tariff_plan=fss.id_tariff_plan
+left join fw_services_cost fsc on fss.id_service_inst=fsc.id_service_inst
+left join fw_contracts fc on fsc.id_contract_inst=fc.id_contract_inst
+where fsc.dt_start<=LAST_DAY(localtimestamp - interval '1' month)
+and fsc.dt_stop>=LAST_DAY(localtimestamp - interval '1' month)
+group by ft.v_name,fc.id_department
+order by summ desc)
+where rownum<=5) sums 
+left join fw_departments fd on sums.id_department=fd.id_department
+order by summ desc
