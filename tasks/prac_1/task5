@@ -1,0 +1,30 @@
+select namedep, fs.v_name, summ
+from 
+    (select * 
+    from 
+        (select n_cost_period, fsc.id_service_inst, id_contract_inst
+        from fw_services_cost fsc
+        where dt_start<=localtimestamp
+          and dt_stop>=localtimestamp
+        order by n_cost_period desc)
+    where rownum<=5) maxcnt 
+
+left join fw_contracts fc on maxcnt.id_contract_inst=fc.id_contract_inst 
+left join fw_departments fd on fc.id_department=fd.id_department
+left join fw_services fss on maxcnt.id_service_inst=fss.id_service_inst 
+left join fw_service fs on fss.id_service=fs.id_service
+left join 
+
+    (select sum(n_cost_period) as summ, fs.id_service as ids, fd.v_name as namedep
+    from
+    fw_contracts fc 
+    
+    left join fw_departments fd on fc.id_department=fd.id_department
+    left join fw_services_cost fsc on fc.id_contract_inst=fsc.id_contract_inst
+    left join fw_services fss on fsc.id_service_inst=fss.id_service_inst 
+    left join fw_service fs on fss.id_service=fs.id_service
+
+    group by fd.v_name, fs.id_service
+    order by summ desc) t2
+
+on fss.id_service=ids and fd.v_name = namedep
