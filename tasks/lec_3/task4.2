@@ -1,0 +1,27 @@
+create or replace procedure CHANGETYPEv1_1
+       (STARTD in varchar,
+       STOPD in varchar,
+       CURRENTTYPE in int,
+       NEWTYPE in int)
+             
+      is
+      begin
+      
+      for i in (select FWI.ID_IDENTIFIER 
+                from FW_IDENTIFIERS FWI left join FW_SERVICE_IDENTIFIERS FWS on FWI.ID_IDENTIFIER=FWS.ID_IDENTIFIER
+                where ID_SERVICE_INST is null) loop
+      update FW_IDENTIFIERS
+      set ID_SERVICE_IDENTIFIER=NEWTYPE
+      where ID_SERVICE_IDENTIFIER=CURRENTTYPE
+      and ID_IDENTIFIER = i.ID_IDENTIFIER
+      and V_VALUE>=STARTD
+      and V_VALUE<=STOPD;
+      
+      update FW_SERVICE_IDENTIFIERS
+      set ID_SERVICE_IDENTIFIER=NEWTYPE
+      where ID_IDENTIFIER=i.ID_IDENTIFIER;
+      
+      end loop;
+      
+      
+      end CHANGETYPEv1_1;

@@ -1,0 +1,31 @@
+create or replace procedure OTCH
+      (DWR out sys_refcursor,
+      DTSTART in date,
+      DTSTOP in date) is
+          
+      begin
+      open DWR for 
+        select distinct FC.ID_CONTRACT_INST,
+        
+                (select V_NAME
+                from FW_DEPARTMENTS FD
+                where FD.ID_DEPARTMENT=FC.ID_DEPARTMENT) as namedep,
+                
+                (select nvl(sum(F_SUM),0)
+                from TRANS_EXTERNAL te
+                where ID_CONTRACT=FC.ID_CONTRACT_INST
+                and TE.DT_EVENT>=DTSTART
+                and TE.DT_EVENT<=DTSTOP) as SUMM,
+                
+                (select nvl(F_SUM,0) from TRANS_EXTERNAL te where DT_EVENT=(select max(DT_EVENT) as lastevet 
+                                                                    from TRANS_EXTERNAL TE 
+                                                                    where TE.DT_EVENT>=DTSTART
+                                                                    and TE.DT_EVENT<=DTSTOP
+                                                                    and ID_CONTRACT=fc.id_contract_inst)
+                                                            and id_contract_inst=id_contract) as lastpay
+
+
+
+        from FW_CONTRACTS FC;
+      end otch;
+

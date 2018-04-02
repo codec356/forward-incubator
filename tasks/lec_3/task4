@@ -1,0 +1,17 @@
+create or replace procedure CHANGETYPE (
+    STARTD        in varchar,
+    STOPD         in varchar,
+    CURRENTTYPE   in int,
+    NEWTYPE       in int
+)
+    is
+begin
+    update FW_IDENTIFIERS
+        set
+            ID_SERVICE_IDENTIFIER = NEWTYPE
+    where
+        ID_SERVICE_IDENTIFIER = CURRENTTYPE
+        and   V_VALUE >= STARTD
+        and   V_VALUE <= STOPD;
+
+end CHANGETYPE;
