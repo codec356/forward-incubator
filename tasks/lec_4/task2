@@ -1,0 +1,41 @@
+create or replace function CHECK_ACCESS_COMM (
+    PIP_ADDRESS    in INCB_COMMUTATOR.IP_ADDRESS%type,
+    V_COMMUNITY    in varchar2,
+    B_MODE_WRITE   in number) 
+return number 
+is
+temp VARCHAR2(255);
+BEGIN 
+    case B_MODE_WRITE
+    when 1 then
+        select V_COMMUNITY_WRITE
+            into temp
+            from
+                INCB_COMMUTATOR
+            where
+                IP_ADDRESS = PIP_ADDRESS;
+        if  temp = V_COMMUNITY
+        then
+            return 1;
+        else
+            return 0;
+        end if;
+    when 0 then
+        select V_COMMUNITY_READ
+            into temp
+            from
+                INCB_COMMUTATOR
+            where
+                IP_ADDRESS = PIP_ADDRESS;
+        if  temp = V_COMMUNITY
+        then
+            return 1;
+        else
+            return 0;
+        end if;
+        end case;
+        
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+    RAISE_APPLICATION_ERROR(-20001, 'IP not found');
+END CHECK_ACCESS_COMM;

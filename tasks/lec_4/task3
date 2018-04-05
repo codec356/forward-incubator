@@ -1,0 +1,23 @@
+create or replace FUNCTION get_remote_id
+                (pid_commutator in INCB_COMMUTATOR.ID_COMMUTATOR%type)
+                
+   RETURN VARCHAR2 IS
+   remid varchar2(255);
+   remidhex varchar2(255);
+   nidhex number(1,0);
+BEGIN 
+
+    select remote_id, b_need_convert_hex, remote_id_hex
+    into remid, nidhex, remidhex 
+    from INCB_COMMUTATOR
+    where ID_COMMUTATOR=pid_commutator;
+    if nidhex=1 then 
+      if nidhex=1 and remidhex is null then 
+        RAISE_APPLICATION_ERROR(-20001, 'Remote id hex is null');
+      else return remidhex;
+      end if;
+    else return remid;
+    end if;
+  
+
+END;
