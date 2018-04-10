@@ -1,0 +1,76 @@
+create or replace PROCEDURE ref_ident (out number)
+is
+  PID_SERVICE_IDENTIFIER_INST NUMBER;
+  PDT_START TIMESTAMP WITH LOCAL TIME ZONE;
+  PID_SERVICE_INST NUMBER;
+  PV_VALUE_FIELD VARCHAR2(128);
+  PV_VALUE_LIST VARCHAR2(128);
+  PV_PASS VARCHAR2(64);
+  PID_SERVICE_IDENTIFIER NUMBER;
+  PID_IDENTIFIER NUMBER;
+  PID_MANAGER NUMBER;
+  PCHECK_STATUS NUMBER;
+  PDT_STOP timestamp;
+  PID_CONTRACT number;
+  PACTION NUMBER;
+begin 
+    for i in (select fs.id_service_inst as ids
+             from fw_services fs left join fw_service_identifiers fsi on fs.id_service_inst=fsi.id_service_inst and fs.dt_stop=fsi.dt_stop
+             where id_service=2 and fsi.id_service_inst is null
+             and fs.dt_stop>=localtimestamp) loop
+begin
+    select id_service_identifier_inst, id_service_inst, id_service_identifier, id_identifier, id_manager, dt_stop
+    into pid_service_identifier_inst, pid_service_inst, pid_service_identifier, pid_identifier, pid_manager, pdt_stop
+    from fw_service_identifiers fsi
+    where fsi.id_service_inst=i.ids
+    and fsi.dt_stop=(select max(dt_stop)
+                    from fw_service_identifiers fsi 
+                    where fsi.dt_stop<=localtimestamp
+                    and fsi.id_service_inst=i.ids);
+
+    select fi.V_VALUE, fi.V_PASS
+    into pv_value_field, pv_pass
+    from fw_identifiers fi
+    where id_identifier=pid_identifier;
+exception 
+    when no_data_found then null;
+end;
+    select distinct id_contract_inst 
+    into PID_CONTRACT
+    from fw_services
+    where id_service_inst=pid_service_inst;
+
+declare 
+  exid_service_inst number;
+  exid_identifier number;
+begin
+    exid_service_inst:=null;
+    exid_identifier:=null;
+    select fsi.id_service_inst, fsi.id_identifier
+    into exid_service_inst, exid_identifier
+    from fw_service_identifiers fsi
+    where fsi.dt_stop>=localtimestamp
+    and fsi.v_status='U'
+    and fsi.b_deleted=0
+    and fsi.id_service_inst!=pid_service_inst
+    and fsi.id_identifier=pid_identifier;
+
+    dbms_output.put_line(to_char(pid_service_identifier)||' '||to_char(pdt_stop)||' '||to_char(pid_contract));
+exception 
+    when no_data_found then
+    P_BASE_EXCHANGE.SAVESERVICE_IDENTIFIERS(PID_SERVICE_IDENTIFIER_INST, 
+                                            PDT_STOP,                                       
+                                            PID_SERVICE_INST,
+                                            pv_value_field,
+                                            pv_pass,
+                                            null,
+                                            PID_SERVICE_IDENTIFIER,
+                                            PID_IDENTIFIER,
+                                            PID_MANAGER,
+                                            1,
+                                            2);
+end;
+
+end loop;
+
+end;
