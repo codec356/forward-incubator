@@ -1,0 +1,35 @@
+with 
+sumcost as 
+(select sum(n_cost_period) as co, fc.V_EXT_IDENT
+from FW_SERVICES_COST fsc left join FW_CONTRACTS fc on fsc.ID_CONTRACT_INST=fc.ID_CONTRACT_INST
+where fsc.DT_START<=localtimestamp
+and fsc.DT_STOP>=localtimestamp
+group by fc.V_EXT_IDENT),--, fc.ID_DEPARTMENT),
+
+sumdiscount as
+(select sum(n_discount_period) as dis, fc.V_EXT_IDENT--, fc.ID_DEPARTMENT
+from FW_SERVICES_COST fsc left join FW_CONTRACTS fc on fsc.ID_CONTRACT_INST=fc.ID_CONTRACT_INST
+where fsc.DT_START<=localtimestamp
+and fsc.DT_STOP>=localtimestamp
+group by fc.V_EXT_IDENT),
+
+
+maxotn as (
+select *
+from 
+(select max(dis/co) as mo, sc.v_ext_ident as nomer
+from sumcost sc, sumdiscount sd 
+where sc.v_ext_ident=sd.v_ext_ident
+and co!=0
+and dis!=0
+group by sc.v_ext_ident
+order by mo desc)
+where rownum=1)
+
+
+select maxotn.nomer, v_name, co, dis from
+sumcost, sumdiscount, maxotn left join FW_CONTRACTS fc on nomer=fc.v_ext_ident 
+                             left join FW_DEPARTMENTS fd on fc.id_department=fd.id_department
+where maxotn.nomer=sumdiscount.V_EXT_IDENT
+and maxotn.nomer=sumcost.v_ext_ident
+

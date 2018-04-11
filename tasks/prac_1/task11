@@ -1,0 +1,24 @@
+with suma as
+(select sum(fsc.N_COST_PERIOD) as sumap, id_department, fss.ID_TARIFF_PLAN
+from FW_SERVICES_COST fsc 
+left join FW_SERVICES fss on fsc.ID_SERVICE_INST=fss.ID_SERVICE_INST 
+left join FW_SERVICE fs on fss.ID_SERVICE=fs.ID_SERVICE
+left join FW_CONTRACTS fc on fsc.id_contract_inst = fc.ID_CONTRACT_INST
+where fs.B_ADD_SERVICE=1
+and fsc.DT_START<=localtimestamp
+and fsc.DT_STOP>=localtimestamp
+group by fc.ID_DEPARTMENT, fss.ID_TARIFF_PLAN
+order by fc.ID_DEPARTMENT, sumap desc )
+
+select max(sumap) summ, id_department
+from suma
+group by id_department
+
+select distinct fd.V_NAME, ft.V_NAME, summ from 
+(select max(sumap) summ, id_department
+from suma
+group by id_department) ms 
+left join suma on ms.summ=suma.sumap
+left join FW_DEPARTMENTS fd on ms.id_department=fd.ID_DEPARTMENT
+left join FW_TARIFF_PLAN ft on suma.ID_TARIFF_PLAN=ft.ID_TARIFF_PLAN
+order by summ desc

@@ -1,0 +1,29 @@
+with jt as
+(select fsc.id_service_inst, n_cost_period, fc.id_department, fc.v_ext_ident, b_add_service
+         from FW_SERVICES_COST fsc left join fw_services fss on fsc.id_service_inst=fss.ID_SERVICE_INST
+                                   left join fw_service fs on fss.ID_SERVICE=fs.id_service
+                                   left join FW_CONTRACTS fc on fsc.id_contract_inst = fc.ID_CONTRACT_INST
+where fsc.dt_start<=localtimestamp
+and fsc.dt_stop>=localtimestamp),
+                                
+cntna as 
+(select count(1) as NoAdd, V_EXT_IDENT, id_department
+from jt
+where B_ADD_SERVICE=0
+group by V_EXT_IDENT, id_department),
+
+cntadd as
+(
+select count(jt.id_service_inst) as Adds, jt.V_EXT_IDENT, jt.ID_DEPARTMENT
+from jt,    (select ID_SERVICE_INST from 
+            (select * from jt
+            where b_add_service=1
+            order by n_cost_period)
+            where rownum<=(select count(1) from jt where B_ADD_SERVICE=1)) top
+where jt.id_service_inst=top.id_service_inst
+group by jt.v_ext_ident, jt.id_department)
+
+select cntna.v_ext_ident, v_name, noadd, nvl(adds,0) 
+from cntna left join cntadd on cntna.v_ext_ident=cntadd.v_ext_ident 
+           left join FW_DEPARTMENTS fd on cntna.id_department=fd.id_department
+                                   
