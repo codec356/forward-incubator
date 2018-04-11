@@ -1,0 +1,23 @@
+with suma as
+(select sum(fsc.N_COST_PERIOD) as sumap, fc.id_department as dep, fss.ID_TARIFF_PLAN as tp
+from FW_SERVICES_COST fsc 
+left join FW_SERVICES fss on fsc.ID_SERVICE_INST=fss.ID_SERVICE_INST 
+left join FW_SERVICE fs on fss.ID_SERVICE=fs.ID_SERVICE
+left join FW_CONTRACTS fc on fsc.id_contract_inst = fc.ID_CONTRACT_INST
+where fsc.DT_START<=localtimestamp
+and fsc.DT_STOP>=localtimestamp
+group by fc.ID_DEPARTMENT, fss.ID_TARIFF_PLAN
+order by fc.ID_DEPARTMENT, sumap desc ),
+
+
+rns as
+(select row_number() over (partition by dep order by sumap desc) as rn, sumap, fd.v_name as ndep, ft.v_name as ntp from suma
+left join FW_DEPARTMENTS fd on suma.dep=fd.ID_DEPARTMENT
+left join FW_TARIFF_PLAN ft on suma.tp=ft.ID_TARIFF_PLAN)
+
+
+select ntp, ndep, case when rn=1 then 'max' else 'min' end as priznak
+from rns
+where (ndep='АЛМАТЫ' and rn=(select max(rn) from rns where ndep='АЛМАТЫ')) or (ndep!='АЛМАТЫ' and rn=1) 
+order by sumap desc;
+
