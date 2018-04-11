@@ -1,0 +1,26 @@
+with summ as
+(select sum(n_cost_period) as sumap, fc.id_department, fc.v_ext_ident
+from FW_SERVICES_COST fsc 
+    left join FW_SERVICES fss on fsc.ID_SERVICE_INST=fss.ID_SERVICE_INST 
+    left join FW_SERVICE fs on fss.ID_SERVICE=fs.ID_SERVICE
+    left join FW_CONTRACTS fc on fsc.id_contract_inst = fc.ID_CONTRACT_INST
+where fsc.DT_START<=localtimestamp
+  and fsc.DT_STOP>=localtimestamp
+group by fc.ID_DEPARTMENT, fc.V_EXT_IDENT
+order by fc.ID_DEPARTMENT, sumap desc),
+
+maxap as
+(select id_department, v_ext_ident from
+    (select row_number() over (partition by id_department order by sumap desc) as rnk, sumap, id_department, v_ext_ident
+    from summ)
+where rnk=1),
+
+minap as
+(select id_department, v_ext_ident from
+    (select row_number() over (partition by id_department order by sumap) as rnk, sumap, id_department, v_ext_ident
+    from summ)
+where rnk=1)
+
+select maxap.v_ext_ident,'max', minap.v_ext_ident, 'min', fd.V_NAME
+from maxap, minap left join FW_DEPARTMENTS fd on minap.id_department=fd.id_department
+where maxap.id_department=minap.id_department
